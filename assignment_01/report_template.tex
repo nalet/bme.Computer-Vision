@@ -1,0 +1,125 @@
+\documentclass{paper}
+
+%\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+
+
+% load package with ``framed'' and ``numbered'' option.
+%\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+
+% something NOT relevant to the usage of the package.
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{18pt}
+
+
+
+
+
+
+\usepackage[latin1]{inputenc} 
+\usepackage[T1]{fontenc} 
+
+\usepackage{listings} 
+
+\newcommand{\equationinalign}[1]{%
+  \multispan{2}%
+  \hfill$\displaystyle{#1}$\hfill
+  \ignorespaces
+}
+
+\lstset{% 
+   language=Python, 
+   basicstyle=\small\ttfamily, 
+} 
+
+
+
+\title{Assignment 1}
+
+
+
+\author{Nalet Meinen\\13-463-955}
+% //////////////////////////////////////////////////
+
+
+\begin{document}
+
+
+
+\maketitle
+
+
+% Add figures:
+%\begin{figure}[t]
+%%\begin{center}
+%\quad\quad   \includegraphics[width=1\linewidth]{ass2}
+%%\end{center}
+%
+%\label{fig:performance}
+%\end{figure}
+
+\section*{Image blending}
+
+\begin{enumerate}
+\item \textbf{Exercise 1}
+
+\begin{align*}
+   \lVert \Delta u \rVert_2 \simeq \sum_{i,j} \sqrt{ u[i+1,j] - u[i,j]^2 + ( u[i,j + 1] - u[i,j] )^2 }
+\end{align*}
+
+\item \textbf{Exercise 2}
+
+1)
+\begin{align*}
+   |u_C-g_C|^2_\Omega &= \sum_{i,j} \Omega[i,j] | u_C[i,j] - g_C[i,j] |^2_2 \\
+   \frac{\partial}{\partial u[p,q]} |u_C-g_C|^2_\Omega &= \frac{\partial}{\partial u[p,q]} \sum_{i,j} \Omega[i,j] | u_C[i,j] - g_C[i,j] |^2_2
+\end{align*}
+\begin{align*}
+   \equationinalign{\textrm{if} \; p = i \; \textrm{and} \; q = j \; \textrm{:}} \\
+   \frac{\partial}{\partial u[p,q]} \sum_{i,j} \Omega[i,j] | u_C[i,j] - g_C[i,j] |^2_2 &= 2 \cdot \Omega[i,j] \cdot ( u_C[i,j] - g_C[i,j] ) \\
+   \frac{\partial |u_C-g_C|^2_\Omega}{\partial u[i,j]} &= 2 \cdot \Omega[i,j] \cdot ( u_C[i,j] - g_C[i,j] )
+\end{align*}
+
+2)
+\begin{align*}
+   \frac{\partial |u_C-g_C|^2_\Omega}{\partial u[i,j]} &= \frac{\partial \tau[i,j]}{\partial u[i,j]} + \frac{\partial \tau[i - 1,j]}{\partial u[i,j]} + \frac{\partial \tau[i,j - 1]}{\partial u[i,j]} \\
+   &= \frac{u_C[i,j] - u_C[i-1,j]}{\sqrt{(u_C[i,j] - u_C[i-1,j])^2 + (u_C[i-1,j+1] - u_C[i-1,j])^2}} + \\
+   &\quad\; \frac{u_C[i,j] - u_C[i,j-1]}{\sqrt{(u_C[i+1,j-1] - u_C[i,j-1])^2 + (u_C[i,j] - u_C[i,j-1])^2}} + \\
+   &\quad\; \frac{2 \cdot u_C[i,j] - u_C[i+1,j] - u_C[i,j+1]}{\sqrt{(u_C[i+1,j] - u_C[i,j])^2 + (u_C[i,j+1] - u_C[i,j])^2}} + \\
+   & \textrm{where} \\
+   \tau[i,j] &\doteq \sqrt{(u_C[i+1,j] - u_C[i,j])^2 + (u_C[i,j+1] - u_C[i-1,j])^2}
+\end{align*}
+
+
+\item \textbf{Implementation.} For each of the 3 solvers (gradient descent, Linearization+Gauss-Seidel, Linearization+SOR):
+
+\begin{itemize}
+\item Show images of the inputs
+\item Show 5 images of the reconstruction as the method progresses iteration by iteration: The initial, the final image and 3 more images in between.
+\item Show the energy against iteration time (we should see it decreasing over time).
+\end{itemize}
+
+\item \textbf{State which of the 3 solvers you choose. Show images obtained by very high, very low and manually-tuned (approximately optimal) $\lambda$.} In this section you should:
+
+\begin{itemize}
+\item Display 3 images with different $\lambda$: one with very low, one with very high and one with the manually-tuned (approximately optimal) $\lambda$.
+\item Describe the effect of $\lambda$ on the solution.
+\end{itemize}
+
+\item \textbf{Image blending:} 
+\begin{itemize}
+\item Display your own image composition here along with the foreground, background and mask images.
+\item Describe how you used or modified the code to create your image(s).
+\end{itemize}
+
+
+\end{enumerate}
+
+
+ \end{document}
+ 
+ 
