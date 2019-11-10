@@ -179,28 +179,29 @@ def LGS(f, b, omega, lmbda):
     return u #return b
 
 
+# # %%
+# # blend
+# lmbda = 5  # change 
+# u = LGS(f2, b, omega, lmbda)
+
+# # display
+# plt.figure()
+# plt.subplot(1, 2, 1)
+# plt.imshow(b)
+# plt.subplot(1, 2, 2)
+# plt.imshow(f2)
+
+# plt.figure()
+# plt.subplot(1, 2, 1)
+# plt.imshow(expand_dims(omega, 2) * f2 + expand_dims(1 - omega, 2) * b)
+# plt.subplot(1, 2, 2)
+# plt.imshow(u)
+# plt.show()
+# # %% [markdown]
+# # ## (c) Linearization + SOR
+
 # %%
-# blend
-lmbda = 5  # change 
-u = LGS(f2, b, omega, lmbda)
 
-# display
-plt.figure()
-plt.subplot(1, 2, 1)
-plt.imshow(b)
-plt.subplot(1, 2, 2)
-plt.imshow(f2)
-
-plt.figure()
-plt.subplot(1, 2, 1)
-plt.imshow(expand_dims(omega, 2) * f2 + expand_dims(1 - omega, 2) * b)
-plt.subplot(1, 2, 2)
-plt.imshow(u)
-plt.show()
-# %% [markdown]
-# ## (c) Linearization + SOR
-
-# %%
 def LSOR(f, b, omega, lmbda):
     """         
     b: backgound color image of size (M, N, 3)
@@ -211,36 +212,26 @@ def LSOR(f, b, omega, lmbda):
     :returns u: blended image of size (M, N, 3)
     """
     
-    u = b
-    w = 1
-    m,n,l = shape(b)
-    A = zeros((m,n,l))
-    coeff1 = array([2,0,0,0,0]) # coefficients of the hessian for the background part
-    coeff2 = array([8,-2,-2,-2,-2]) # coefficients of the hessian for the foreground part
-    c = zeros((m,n,l))
-    n_iterations = 10
-    E = []# value of the energy function
+    u = b.copy()
+    h, w, color = u.shape
+    i = ones((h, w))
+    I = sparse.eye(h*w)
+    
+    for t in range(10):
+        for c in range(color):
+            u_lap = hessian_matrix(u[:, :, c], omega, lmbda)
+            f_lap = hessian_matrix(f[:, :, c], omega, lmbda)
+            i_lap = hessian_matrix(i, omega, lmbda)
 
-    for s in arange(0,n_iterations):
-        grad_E = GD_E(u, b, f, omega, lmbda)
-        #E = [E; E_AB(u, b, f, omega, lmbda)];
+            b_c = -1*(((1-omega)*(u[:, :, c] - b[:, :, c])).reshape(-1, 1) + (u_lap-f_lap).sum(axis=1))
+            A = i_lap + sparse.diags((1-omega).reshape(-1))
 
-        for i in arange(0,l):
-            t = u[:,:,i] # extract the color channel
-            background = (1-omega) * reshape(hessian_matrix(t,coeff1,lmbda) * t.flatten('F'), (m,n), order='F') # reshape directly the H*u calculation
-            foreground = omega*reshape(hessian_matrix(t,coeff2,lmbda) * t.flatten('F'), (m,n), order='F') # reshape directly the H*u calculation
-            A[:,:,i] = background + lmbda * foreground
-            c[:,:,i] = A[:,:,i] * u[:,:,i] - grad_E[:,:,i]
-        
-
-        # Successive over relaxations algorithm for each color channel
-        for i in arange(0,l):
             L = tril(A[:,:,i], -1)
             U = triu(A[:,:,i], 1)
             d = diag(A[:,:,i])
-            D = diag(d)
-            u[:,:,i] = linalg.solve((D+w*L),(w*c[:,:,i]-(w*U + (w-1)*D)*u[:,:,i]))
-    
+            D = diag(b_c)
+
+            u[:, :, c] += linalg.solve((D+w*L),(w*c[:,:,i]-(w*U + (w-1)*D)*u[:,:,i]))
     return u #return b
 
 
