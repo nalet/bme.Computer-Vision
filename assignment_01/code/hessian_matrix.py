@@ -5,8 +5,8 @@ from scipy import sparse
 def hessian_matrix(u, omega, lmbda):
     # let 'u' be the known image
     m, n, *_ = u.shape
-    
-    # define the coordinates of a neighborhood around each pixel 
+
+    # define the coordinates of a neighborhood around each pixel
     # (center, north, south, west, east, north-west, north-east, south-west, south-east)
     # there are 9 possible neighbors
     rows = zeros((9, m * n))
@@ -15,7 +15,7 @@ def hessian_matrix(u, omega, lmbda):
 
     for i in range(n):
         for j in range(m):
-            # center pixel (i, j)
+           # center pixel (i, j)
             rows[0, i * m + j] = i * m + j
             cols[0, i * m + j] = i * m + j
             vals[0, i * m + j] = omega[0]  # here change the value (could depend on 'u')
