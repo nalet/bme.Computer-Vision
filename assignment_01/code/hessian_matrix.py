@@ -18,23 +18,23 @@ def hessian_matrix(u, omega, lmbda):
             # center pixel (i, j)
             rows[0, i * m + j] = i * m + j
             cols[0, i * m + j] = i * m + j
-            vals[0, i * m + j] = 4 * u[i, j] * lmbda * omega[i, j]  # here change the value (could depend on 'u')
+            vals[0, i * m + j] = omega[0]  # here change the value (could depend on 'u')
             # northern pixel (i, j - 1)
             rows[1, i * m + j] = i * m + j
             cols[1, i * m + j] = i * m + max(j - 1, 0)
-            vals[1, i * m + j] = -1 * u[i, max(j - 1, 0)] * lmbda * omega[i, j]  # here change the value (could depend on 'u')
+            vals[1, i * m + j] = omega[1]  # here change the value (could depend on 'u')
             # southern pixel (i, j + 1)
             rows[2, i * m + j] = i * m + j
             cols[2, i * m + j] = i * m + min(j + 1, m - 1)
-            vals[2, i * m + j] = -1 * u[i, min(j + 1, m - 1)] * lmbda * omega[i, j]  # here change the value (could depend on 'u')
+            vals[2, i * m + j] = omega[2]  # here change the value (could depend on 'u')
             # western pixel  (i - 1, j)
             rows[3, i * m + j] = i * m + j
             cols[3, i * m + j] = max(i - 1, 0) * m + j
-            vals[3, i * m + j] = -1 * u[max(i - 1, 0), j] * lmbda * omega[i, j] # here change the value (could depend on 'u')
+            vals[3, i * m + j] = omega[3]  # here change the value (could depend on 'u')
             # eastern pixel  (i + 1, j)
             rows[4, i * m + j] = i * m + j
             cols[4, i * m + j] = min(i + 1, n - 1) * m + j
-            vals[4, i * m + j] = -1  * u[min(i + 1, n - 1), j] * lmbda * omega[i, j] # here change the value (could depend on 'u')
+            vals[4, i * m + j] = omega[4]  # here change the value (could depend on 'u')
             # north-western pixel (i - 1, j - 1)
             rows[5, i * m + j] = i * m + j
             cols[5, i * m + j] = max(i - 1, 0) * m + max(j - 1, 0)

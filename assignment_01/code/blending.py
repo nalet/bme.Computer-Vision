@@ -91,7 +91,7 @@ def GD(f, b, omega, lmbda):
     eps = 0.05 # step size
     err_E = iinfo(int32).max # error which determines when to stop
     grad_E = zeros((m,n,l))
-    #E = []; # value of the energy function
+    #E = [] # value of the energy function
     
     
     
@@ -100,7 +100,7 @@ def GD(f, b, omega, lmbda):
         grad_E = GD_E(u, b, f, omega, lmbda)
 
         err_E = max(grad_E.flatten('F'))
-        #E = [E; E_AB(u, b, f, omega, lambda)]
+        #E = [E E_AB(u, b, f, omega, lambda)]
 
         for k in arange(0,l):
             u[:,:,k] = u[:,:,k] - eps * grad_E[:,:,k]
@@ -139,10 +139,8 @@ def gauss_seidel(A, b):
     L = sparse.tril(A, 0)
     U = sparse.triu(A, 1)
     
-    solve_L = sparse.linalg.factorized(L)
-    
     for _ in range(15):
-        x = solve_L(b - U*x)
+        x = sparse.linalg.factorized(b - U*x)
         
     x = x.reshape((256, 256,))
     return x
@@ -212,27 +210,63 @@ def LSOR(f, b, omega, lmbda):
     :returns u: blended image of size (M, N, 3)
     """
     
-    u = b.copy()
-    h, w, color = u.shape
-    i = ones((h, w))
-    I = sparse.eye(h*w)
+    # u = b.copy()
+    # h, w, color = u.shape
+    # i = ones((h, w))
+    # I = sparse.eye(h*w)
     
-    for t in range(10):
-        for c in range(color):
-            u_lap = hessian_matrix(u[:, :, c], omega, lmbda)
-            f_lap = hessian_matrix(f[:, :, c], omega, lmbda)
-            i_lap = hessian_matrix(i, omega, lmbda)
+    # for t in range(10):
+    #     for c in range(color):
+    #         u_lap = hessian_matrix(u[:, :, c], omega, lmbda)
+    #         f_lap = hessian_matrix(f[:, :, c], omega, lmbda)
+    #         i_lap = hessian_matrix(i, omega, lmbda)
 
-            b_c = -1*(((1-omega)*(u[:, :, c] - b[:, :, c])).reshape(-1, 1) + (u_lap-f_lap).sum(axis=1))
-            A = i_lap + sparse.diags((1-omega).reshape(-1))
+    #         b_c = -1*(((1-omega)*(u[:, :, c] - b[:, :, c])).reshape(-1, 1) + (u_lap-f_lap).sum(axis=1))
+    #         A = i_lap + sparse.diags((1-omega).reshape(-1))
+
+    #         L = tril(A[:,:,i], -1)
+    #         U = triu(A[:,:,i], 1)
+    #         d = diag(A[:,:,i])
+    #         D = diag(d)
+
+    #         u[:, :, c] = linalg.solve((D+1*L),(1*c[:,:,i]-(1*U + (1-1)*D)*u[:,:,i]))
+    # return u #return b
+
+    u = b.copy()
+    m,n,l = shape(b)
+    A = zeros((m,n,l))
+    coeff1 = array([2,0,0,0,0])
+    coeff2 = array([8,-2,-2,-2,-2])
+    c = zeros((m,n,l))
+    n_iterations = 90
+    E = array([])
+    set_printoptions(threshold=256*256)
+    for s in range(n_iterations):
+        grad_E = GD_E(u, b, f, omega, lmbda)
+
+        for i in range(l):
+            t = u[:,:,i]
+            t_ = sparse.csr_matrix(t.flatten('F'))
+
+            ht1 = reshape( t_ * hessian_matrix(t,coeff1,lmbda), (m,n), order="F").toarray()
+            ht2 = reshape( t_ * hessian_matrix(t,coeff2,lmbda), (m,n), order="F").toarray()
+
+            background = ht1 @ (1-omega)
+            foreground = ht2 @ omega
+
+            A[:,:,i] = background + lmbda * foreground
+            c[:,:,i] = A[:,:,i] @ u[:,:,i] - grad_E[:,:,i]
 
             L = tril(A[:,:,i], -1)
             U = triu(A[:,:,i], 1)
             d = diag(A[:,:,i])
-            D = diag(b_c)
+            D = diag(d)
 
-            u[:, :, c] += linalg.solve((D+w*L),(w*c[:,:,i]-(w*U + (w-1)*D)*u[:,:,i]))
-    return u #return b
+            A_ = D+L
+            B_ = c[:,:,i] - U @ u[:,:,i] 
+            u[:,:,i] = linalg.solve( A_, B_ )
+    return u
+
 
 
 # %%
