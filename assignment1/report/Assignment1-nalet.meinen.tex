@@ -1,0 +1,250 @@
+% --------------------------------------------------------------
+% This is all preamble stuff that you don't have to worry about.
+% Head down to where it says "Start here"
+% --------------------------------------------------------------
+
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{graphicx} %This allows to include eps figures
+\usepackage{subcaption}
+\usepackage[section]{placeins}
+\usepackage{layout}
+\usepackage{etoolbox}
+\usepackage{mathabx}
+% This is to include code
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstdefinestyle{Python}{
+    language        = Python,
+    basicstyle      = \ttfamily,
+    keywordstyle    = \color{blue},
+    keywordstyle    = [2] \color{teal}, % just to check that it works
+    stringstyle     = \color{green},
+    commentstyle    = \color{red}\ttfamily
+}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\X}{\mathbb{X}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{reflection}[2][Reflection]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{proposition}[2][Proposition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+
+\begin{document}
+
+% --------------------------------------------------------------
+%                         Start here
+% --------------------------------------------------------------
+
+%\renewcommand{\qedsymbol}{\filledbox}
+
+\title{Assignment 1 - Image Deblurring}%replace X with the appropriate number
+\author{Nalet Meinen \\ %replace with your name
+Computer Vision
+}
+
+\maketitle
+
+\section{Finite difference approximation of the objective \\
+         function $E$}
+
+The deblurring problem can be written as the following optimization
+\begin{align}
+    \hat{u} &= \mathrm{arg} \underbrace{min}_{u} E[u] \\
+    E[u]    &= |g - u * k|^2 + \lambda R[u]
+\end{align}
+
+\noindent where the term $ |g - u * k|^2 $ equals to:
+
+\begin{align}
+    |g - u * k|^2 = \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big| g[i,j] - \sum_{p=0}^{1} \sum_{q=0}^{1} k[p,q] u[i-p + 1,j - q + 1] \Big|^2_2
+\end{align}
+
+\noindent where $g$ is the blurred image, $k$ is the kernel and $u$ should be our result, the deblurred image.
+
+\noindent The kernel used for this assignment is:
+
+\begin{align}
+    k_1 =   \begin{bmatrix}
+                \frac{1}{2} & 0 \\
+                \frac{1}{2} & 0 \\
+            \end{bmatrix}
+\end{align}
+
+\subsection{Derive the corresponding discretization for the anisotropic prior}
+
+We want to discretize the anisotropic prior:
+
+\begin{align}
+    R[u] = | \nabla u |_1 = \sum_{i=0}^{m} \sum_{j=0}^{n} | \nabla u[i,j] |_1
+\end{align}
+
+\noindent the discretized version is similar but takes the absolute value.
+
+\begin{align}
+    \resizebox{1.0\hsize}{!}{$
+        R[u] = \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} |u[i + 1,j] - u[i,j]| + |u[i, j + 1] - u[i,j]| + \sum_{j=0}^{n-1} |u[m, j + 1] - u[m,j]| + \sum_{i=0}^{m-1} |u[i + 1,n] - u[i,n]|
+    $}
+\end{align}
+
+
+\section{Calculation of the exact gradient of the \\
+         discretized $E$}
+
+\subsection{$\lambda = 0$}
+
+With $\lambda = 0$ the problem reduces to:
+\begin{align*}
+    E[u] &= |g - u * k|^2 \\
+    E[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big| g[i,j] - \sum_{p=0}^{1} \sum_{q=0}^{1} k[p,q] u[i-p + 1,j - q + 1] \Big|^2_2
+\end{align*}
+
+\begin{align*}
+    E[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big| g[i,j] - \sum_{p=0}^{1} \sum_{q=0}^{1} k[p,q] u[i-p + 1,j - q + 1] \Big|^2_2 \\
+    E[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big| g[i,j] - ( \frac{1}{2} u[i-0 + 1,j - 0 + 1] + \frac{1}{2} u[i-1 + 1,j - 0 + 1] ) \Big|^2_2 \\
+    \nabla E[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big( g[i,j] - ( \frac{1}{2} u[i-0 + 1,j - 0 + 1] + \frac{1}{2} u[i-1 + 1,j - 0 + 1] ) \Big)^2
+\end{align*}
+
+\noindent we finish here with the basis form where then we go further. 
+
+Now we can start with the spacial cases, there are 9 cases: center pixel (i, j), northern pixel (i, j - 1), southern pixel (i, j + 1), western pixel  (i - 1, j), eastern pixel  (i + 1, j), north-western pixel (i - 1, j - 1), north-eastern pixel (i + 1, j - 1), south-western pixel (i - 1, j + 1), south-eastern pixel  (i + 1, j + 1).
+
+~\\
+Here we see the center pixel (i, j):
+\begin{align*}
+    u_\nabla E[i,j] &= 2( g[i,j] - ( \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1] ) ) \\
+    u_\nabla E[i,j] &= \frac{1}{2} 2( g[i,j] - ( \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1] ) ) \\
+    u_\nabla E[i,j] &=  g[i,j] - \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1]  
+\end{align*}
+
+\noindent The others will "behave" the same, other $u$ are hidden. Lets look at the boundaries where $i,j = 0$ and $i,j = N$
+
+\noindent $i,j = 0$
+\begin{align*}
+    u_\nabla E[i,j] &= 2( g[0,0] - ( \frac{1}{2} u[0 + 1,0 + 1] + \frac{1}{2} u[0,0 + 1] ) ) \\
+    u_\nabla E[i,j] &=  g[0,0] - \frac{1}{2} u[1,1] + \frac{1}{2} u[0,1]  
+\end{align*}
+
+It stays the same as we have no negative value.
+
+\noindent $i,j = N-1,M-1$
+\begin{align*}
+    u_\nabla E[i,j] &= 2( g[N,M] - ( \frac{1}{2} u[N + 1,M + 1] + \frac{1}{2} u[N,M + 1] ) ) \\
+    u_\nabla E[i,j] &=  g[N,M] - \frac{1}{2} u[N + 1,M + 1] + \frac{1}{2} u[N,M + 1]  
+\end{align*}
+
+Behaves good, as we set $N-1$ and $M-1$
+
+\subsection{Gaussian prior}
+
+The derivative of the data term stays the same, so we only have to look at the Gaussian prior which is:
+{\scriptsize  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+	\setlength{\belowdisplayshortskip}{3pt}
+    \begin{align*}
+        R[u] &= | \nabla u |^2_2 = \sum_{i=0}^{m} \sum_{j=0}^{n} | \nabla u[i,j] |^2_2 \\
+        R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} (u[i + 1,j] - u[i,j])^2 + (u[i, j + 1] - u[i,j])^2 + \sum_{j=0}^{n-1} (u[m, j + 1] - u[m,j])^2 + \sum_{i=0}^{m-1} (u[i + 1,n] - u[i,n])^2
+    \end{align*}
+}%
+
+{\scriptsize  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+	\setlength{\belowdisplayshortskip}{3pt}
+    \begin{align*}
+        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} (u[i + 1,j] - u[i,j])^2 + (u[i, j + 1] - u[i,j])^2 + \sum_{j=0}^{n-1} (u[m, j + 1] - u[m,j])^2 + \sum_{i=0}^{m-1} (u[i + 1,n] - u[i,n])^2 \\
+        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) + \sum_{j=0}^{n-1} 2(u[m, j + 1] - u[m,j]) + \sum_{i=0}^{m-1} 2(u[i + 1,n] - u[i,n]) \\
+    \end{align*}
+}%
+
+Here we see the center pixel (i, j):
+{\scriptsize  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+	\setlength{\belowdisplayshortskip}{3pt}
+    \begin{align*}
+        u_\nabla R[i,j] &= 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) + 2(u[m, j + 1] - u[m,j]) + 2(u[i + 1,n] - u[i,n]) \\
+        u_\nabla R[i,j] &= 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) + 2(0 - u[i,n]) \\
+        u_\nabla R[i,j] &= 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) - 2u[i,n] \\
+    \end{align*}
+}%
+
+Complete Equation:
+{\scriptsize  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+	\setlength{\belowdisplayshortskip}{3pt}
+    \begin{align*}
+        u_\nabla R[i,j] &= g[i,j] - \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1] +  \lambda ( 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) - 2u[i,n] )
+    \end{align*}
+}%
+
+\subsection{Anisotropic Total Variation}
+The derivative of the data term stays the same, so we only have to look at the anisotropic Gaussian prior which is:
+{\scriptsize  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+	\setlength{\belowdisplayshortskip}{3pt}
+    \begin{align*}
+        R[u] &= | \nabla u |_1 = \sum_{i=0}^{m} \sum_{j=0}^{n} | \nabla u[i,j] |_1 \\
+        R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} |u[i + 1,j] - u[i,j]| + |u[i, j + 1] - u[i,j]| + \sum_{j=0}^{n-1} |u[m, j + 1] - u[m,j]| + \sum_{i=0}^{m-1} |u[i + 1,n] - u[i,n]|
+    \end{align*}
+}%
+
+{\scriptsize  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+	\setlength{\belowdisplayshortskip}{3pt}
+    \begin{align*}
+        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} |u[i + 1,j] - u[i,j]| + |u[i, j + 1] - u[i,j]| + \sum_{j=0}^{n-1} |u[m, j + 1] - u[m,j]| + \sum_{i=0}^{m-1} |u[i + 1,n] - u[i,n]| \\
+        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} + \sum_{j=0}^{n-1} \frac{u[m, j + 1] - u[m,j]}{|u[m, j + 1] - u[m,j]|} + \sum_{i=0}^{m-1} \frac{u[i + 1,n] - u[i,n]}{|u[i + 1,n] - u[i,n]|} \\
+    \end{align*}
+}%
+
+Here we see the center pixel (i, j):
+{\scriptsize  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+	\setlength{\belowdisplayshortskip}{3pt}
+    \begin{align*}
+        u_\nabla R[i,j] &= \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} + \frac{u[m, j + 1] - u[m,j]}{|u[m, j + 1] - u[m,j]|} +  \frac{u[i + 1,n] - u[i,n]}{|u[i + 1,n] - u[i,n]|} \\
+        u_\nabla R[i,j] &= \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} + 0 +  \frac{0 - u[i,n]}{|0 - u[i,n]|} \\
+        u_\nabla R[i,j] &= \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} - \frac{u[i,n]}{|u[i,n]|} \\
+    \end{align*}
+}%
+
+Complete Equation:
+{\scriptsize  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+	\setlength{\belowdisplayshortskip}{3pt}
+    \begin{align*}
+        u_\nabla R[i,j] &= g[i,j] - \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1] +  \lambda ( \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} - \frac{u[i,n]}{|u[i,n]|} )
+    \end{align*}
+}%
+\end{document}
