@@ -32,6 +32,7 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\X}{\mathbb{X}}
 \newcommand{\Z}{\mathbb{Z}}
+\def\doubleunderline#1{\underline{\underline{#1}}}
 
 \newenvironment{theorem}[2][Theorem]{\begin{trivlist}
 \item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
@@ -115,41 +116,74 @@ With $\lambda = 0$ the problem reduces to:
     E[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big| g[i,j] - \sum_{p=0}^{1} \sum_{q=0}^{1} k[p,q] u[i-p + 1,j - q + 1] \Big|^2_2
 \end{align*}
 
+As the kernel has only four entries, we get rid of the summation:
+{\tiny  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+	\setlength{\belowdisplayshortskip}{3pt}
+    \begin{align*}
+                                                                k   &= \begin{bmatrix}
+                                                                            \frac{1}{2} & 0 \\
+                                                                            \frac{1}{2} & 0 \\
+                                                                        \end{bmatrix} \\
+        \sum_{p=0}^{1} \sum_{q=0}^{1} k[p,q] u[i-p + 1,j - q + 1]   &= \frac{1}{2} u[i-0 + 1,j - 0 + 1] + 0 u[i-0 + 1,j - 1 + 1] + \frac{1}{2} u[i-1 + 1,j - 0 + 1] + 0 u[i-1 + 1,j - 1 + 1] \\
+                                                                    &= \frac{1}{2} u[i-0 + 1,j - 0 + 1] + \frac{1}{2} u[i-1 + 1,j - 0 + 1] \\
+                                                                    &= \underline{ \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i, j + 1] } \\
+    \end{align*}
+}%
+
+
 \begin{align*}
-    E[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big| g[i,j] - \sum_{p=0}^{1} \sum_{q=0}^{1} k[p,q] u[i-p + 1,j - q + 1] \Big|^2_2 \\
-    E[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big| g[i,j] - ( \frac{1}{2} u[i-0 + 1,j - 0 + 1] + \frac{1}{2} u[i-1 + 1,j - 0 + 1] ) \Big|^2_2 \\
-    \nabla E[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big( g[i,j] - ( \frac{1}{2} u[i-0 + 1,j - 0 + 1] + \frac{1}{2} u[i-1 + 1,j - 0 + 1] ) \Big)^2
+    \nabla E[u] &= \nabla \Big ( \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big| g[i,j] - \frac{1}{2} u[i + 1,j + 1] - \frac{1}{2} u[i, j + 1]  \Big|^2_2 \Big ) \\
+    \nabla E[u] &= \nabla \Big ( \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Big| g[i,j] - \frac{1}{2} u[i + 1,j + 1] - \frac{1}{2} u[i, j + 1]  \Big|^2_2 \Big ) \\
+    \nabla E[u] &= \nabla \Big ( \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} ( g[i,j] - \frac{1}{2} u[i + 1,j + 1] - \frac{1}{2} u[i, j + 1]  )^2 \Big ) \\
+    \nabla E[u] &= \underline{ \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} 2g[i,j] - u[i + 1,j + 1] - u[i, j + 1] } \\
 \end{align*}
 
 \noindent we finish here with the basis form where then we go further. 
 
-Now we can start with the spacial cases, there are 9 cases: center pixel (i, j), northern pixel (i, j - 1), southern pixel (i, j + 1), western pixel  (i - 1, j), eastern pixel  (i + 1, j), north-western pixel (i - 1, j - 1), north-eastern pixel (i + 1, j - 1), south-western pixel (i - 1, j + 1), south-eastern pixel  (i + 1, j + 1).
+Pixels influence each other, we have to look from all perspectives for $\nabla E[i,j]$: center pixel (i, j), northern pixel (i, j - 1), southern pixel (i, j + 1), western pixel  (i - 1, j), eastern pixel  (i + 1, j), north-western pixel (i - 1, j - 1), north-eastern pixel (i + 1, j - 1), south-western pixel (i - 1, j + 1), south-eastern pixel  (i + 1, j + 1).
+{\tiny  
+	\setlength{\abovedisplayskip}{6pt}
+	\setlength{\belowdisplayskip}{\abovedisplayskip}
+	\setlength{\abovedisplayshortskip}{0pt}
+    \setlength{\belowdisplayshortskip}{3pt}
+    \renewcommand{\arraystretch}{2.5}
+    \begin{center}
+        \begin{tabular}{ c c c c c c }
+            $2g[i-1,j-1] - u[i,j] - u[i-1, j]$    & $+$ &     $2g[i,j-1] - u[i + 1,j] - u[i, j]$  & $+$ &     $2g[i+1,j-1] - u[i+2,j] - u[i+1, j]$  & $+$ \\ 
+            $2g[i-1,j] - u[i,j + 1] - u[i-1, j + 1]$    & $+$ &     $2g[i,j] - u[i + 1,j + 1] - u[i, j + 1]$  & $+$ &     $2g[i+1,j] - u[i+2,j + 1] - u[i+1, j + 1]$  & $+$ \\  
+            $2g[i-1,j+1] - u[i,j+2] - u[i-1, j+2]$    & $+$ &     $2g[i,j+1] - u[i + 1,j+2] - u[i, j+2]$  & $+$ &     $2g[i+1,j+1] - u[i+2,j+2] - u[i+1, j+2]$  &    
+        \end{tabular}
+    \end{center}
+}%
 
-~\\
-Here we see the center pixel (i, j):
+As we only try to find the derivative for $\nabla E[i,j]$, most value indexes that don't have $i$ or $j$ will be zero. This leaves us with this term:
 \begin{align*}
-    u_\nabla E[i,j] &= 2( g[i,j] - ( \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1] ) ) \\
-    u_\nabla E[i,j] &= \frac{1}{2} 2( g[i,j] - ( \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1] ) ) \\
-    u_\nabla E[i,j] &=  g[i,j] - \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1]  
+    \nabla E[i,j] =   & - u[i,j] + 2g[i,j-1] - u[i+1,j] - u[i,j] - u[i+2,j] \\
+                    & - u[i+1,j] + 2g[i-1,j] - u[i,j+1] + 2g[i,j] - u[i,j+1] \\ 
+                    & + 2g[i+1,j] - u[i,j+2] + 2g[i,j+1] - u[i,j+2] \\
+    \nabla E[i,j] =   & \doubleunderline{- 2u[i,j] + 2g[i,j-1] - 2u[i+1,j] - u[i+2,j] } \\
+                    & \doubleunderline{+ 2g[i-1,j] - 2u[i,j+1] + 2g[i,j] } \\ 
+                    & \doubleunderline{+ 2g[i+1,j] - 2u[i,j+2] + 2g[i,j+1] }
 \end{align*}
 
-\noindent The others will "behave" the same, other $u$ are hidden. Lets look at the boundaries where $i,j = 0$ and $i,j = N$
+Lets define the behavior at the boundaries: We use the Dirichlet approach, where I set the function to a constant, in this case $0$.
+We define our range as $\forall i \in [1,M-2], \forall j \in [1,N-2]$
+\begin{center}
+    \begin{tabular}{ c c c }
+        $[i,0]$ & $\rightarrow$  & $0$ \\
+        $[0,j]$ & $\rightarrow$  & $0$ \\
+        $[i,N]$ & $\rightarrow$  & $0$ \\
+        $[M,J]$ & $\rightarrow$  & $0$ \\
+        $[i,N-1]$ & $\rightarrow$  & $0$ \\
+        $[M-1,J]$ & $\rightarrow$  & $0$ \\
+    \end{tabular}
+\end{center}
 
-\noindent $i,j = 0$
-\begin{align*}
-    u_\nabla E[i,j] &= 2( g[0,0] - ( \frac{1}{2} u[0 + 1,0 + 1] + \frac{1}{2} u[0,0 + 1] ) ) \\
-    u_\nabla E[i,j] &=  g[0,0] - \frac{1}{2} u[1,1] + \frac{1}{2} u[0,1]  
-\end{align*}
+Our loop will go from $1$ to $M-2$ or $N-2$.
 
-It stays the same as we have no negative value.
-
-\noindent $i,j = N-1,M-1$
-\begin{align*}
-    u_\nabla E[i,j] &= 2( g[N,M] - ( \frac{1}{2} u[N + 1,M + 1] + \frac{1}{2} u[N,M + 1] ) ) \\
-    u_\nabla E[i,j] &=  g[N,M] - \frac{1}{2} u[N + 1,M + 1] + \frac{1}{2} u[N,M + 1]  
-\end{align*}
-
-Behaves good, as we set $N-1$ and $M-1$
 
 \subsection{Gaussian prior}
 
@@ -165,27 +199,27 @@ The derivative of the data term stays the same, so we only have to look at the G
     \end{align*}
 }%
 
-{\scriptsize  
+The derivate then would be:
+{\tiny  
 	\setlength{\abovedisplayskip}{6pt}
 	\setlength{\belowdisplayskip}{\abovedisplayskip}
 	\setlength{\abovedisplayshortskip}{0pt}
 	\setlength{\belowdisplayshortskip}{3pt}
     \begin{align*}
-        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} (u[i + 1,j] - u[i,j])^2 + (u[i, j + 1] - u[i,j])^2 + \sum_{j=0}^{n-1} (u[m, j + 1] - u[m,j])^2 + \sum_{i=0}^{m-1} (u[i + 1,n] - u[i,n])^2 \\
-        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) + \sum_{j=0}^{n-1} 2(u[m, j + 1] - u[m,j]) + \sum_{i=0}^{m-1} 2(u[i + 1,n] - u[i,n]) \\
+        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} -2(u[i + 1,j] - u[i,j]) - 2(u[i, j + 1] - u[i,j]) + \sum_{j=0}^{n-1} - 2(u[m, j + 1] - u[m,j]) + \sum_{i=0}^{m-1} - 2(u[i + 1,n] - u[i,n]) \\
     \end{align*}
 }%
 
-Here we see the center pixel (i, j):
+For the iterative version this would result into this derivative:
 {\scriptsize  
 	\setlength{\abovedisplayskip}{6pt}
 	\setlength{\belowdisplayskip}{\abovedisplayskip}
 	\setlength{\abovedisplayshortskip}{0pt}
 	\setlength{\belowdisplayshortskip}{3pt}
     \begin{align*}
-        u_\nabla R[i,j] &= 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) + 2(u[m, j + 1] - u[m,j]) + 2(u[i + 1,n] - u[i,n]) \\
-        u_\nabla R[i,j] &= 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) + 2(0 - u[i,n]) \\
-        u_\nabla R[i,j] &= 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) - 2u[i,n] \\
+        u_\nabla R[i,j] &= \nabla \Big( - 2(u[i + 1,j] - u[i,j]) - 2(u[i, j + 1] - u[i,j]) - 2(u[m, j + 1] - u[m,j]) - 2(u[i + 1,n] - u[i,n]) \Big) \\
+        u_\nabla R[i,j] &= - 2(u[i + 1,j] - u[i,j]) - 2(u[i, j + 1] - u[i,j]) - 2(0 - u[m,j]) - 2(0 - u[i,n]) \\
+        u_\nabla R[i,j] &= - 2(u[i + 1,j] - u[i,j]) - 2(u[i, j + 1] - u[i,j]) + 2u[m,j] + 2u[i,n] \\
     \end{align*}
 }%
 
@@ -196,9 +230,14 @@ Complete Equation:
 	\setlength{\abovedisplayshortskip}{0pt}
 	\setlength{\belowdisplayshortskip}{3pt}
     \begin{align*}
-        u_\nabla R[i,j] &= g[i,j] - \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1] +  \lambda ( 2(u[i + 1,j] - u[i,j]) + 2(u[i, j + 1] - u[i,j]) - 2u[i,n] )
+        \nabla E[i,j] =   & \doubleunderline{- 2u[i,j] + 2g[i,j-1] - 2u[i+1,j] - u[i+2,j] } \\
+                          & \doubleunderline{+ 2g[i-1,j] - 2u[i,j+1] + 2g[i,j] } \\ 
+                          & \doubleunderline{+ 2g[i+1,j] - 2u[i,j+2] + 2g[i,j+1] } \\
+                          & \doubleunderline{+ \lambda (- 2(u[i + 1,j] - u[i,j]) - 2(u[i, j + 1] - u[i,j]) + 2u[m,j] + 2u[i,n]) }
     \end{align*}
 }%
+hint: $\forall i \in [1,M-2], \forall j \in [1,N-2]$ \\
+The boundaries behave the same as before.
 
 \subsection{Anisotropic Total Variation}
 The derivative of the data term stays the same, so we only have to look at the anisotropic Gaussian prior which is:
@@ -219,21 +258,19 @@ The derivative of the data term stays the same, so we only have to look at the a
 	\setlength{\abovedisplayshortskip}{0pt}
 	\setlength{\belowdisplayshortskip}{3pt}
     \begin{align*}
-        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} |u[i + 1,j] - u[i,j]| + |u[i, j + 1] - u[i,j]| + \sum_{j=0}^{n-1} |u[m, j + 1] - u[m,j]| + \sum_{i=0}^{m-1} |u[i + 1,n] - u[i,n]| \\
-        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} + \sum_{j=0}^{n-1} \frac{u[m, j + 1] - u[m,j]}{|u[m, j + 1] - u[m,j]|} + \sum_{i=0}^{m-1} \frac{u[i + 1,n] - u[i,n]}{|u[i + 1,n] - u[i,n]|} \\
+        \nabla R[u] &= \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} -\frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} - \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} + \sum_{j=0}^{n-1} -\frac{u[m, j + 1] - u[m,j]}{|u[m, j + 1] - u[m,j]|} + \sum_{i=0}^{m-1} -\frac{u[i + 1,n] - u[i,n]}{|u[i + 1,n] - u[i,n]|} \\
     \end{align*}
 }%
 
-Here we see the center pixel (i, j):
+For the iterative version this would result into this derivative:
 {\scriptsize  
 	\setlength{\abovedisplayskip}{6pt}
 	\setlength{\belowdisplayskip}{\abovedisplayskip}
 	\setlength{\abovedisplayshortskip}{0pt}
 	\setlength{\belowdisplayshortskip}{3pt}
     \begin{align*}
-        u_\nabla R[i,j] &= \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} + \frac{u[m, j + 1] - u[m,j]}{|u[m, j + 1] - u[m,j]|} +  \frac{u[i + 1,n] - u[i,n]}{|u[i + 1,n] - u[i,n]|} \\
-        u_\nabla R[i,j] &= \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} + 0 +  \frac{0 - u[i,n]}{|0 - u[i,n]|} \\
-        u_\nabla R[i,j] &= \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} - \frac{u[i,n]}{|u[i,n]|} \\
+        \nabla R[i,j] &= \nabla \Bigg( -\frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} - \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} -\frac{u[m, j + 1] - u[m,j]}{|u[m, j + 1] - u[m,j]|} -\frac{u[i + 1,n] - u[i,n]}{|u[i + 1,n] - u[i,n]|} \Bigg) \\
+        \nabla R[i,j] &= -\frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} - \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} -\frac{u[i + 1,n] - u[i,n]}{|u[i + 1,n] - u[i,n]|} \\
     \end{align*}
 }%
 
@@ -244,7 +281,12 @@ Complete Equation:
 	\setlength{\abovedisplayshortskip}{0pt}
 	\setlength{\belowdisplayshortskip}{3pt}
     \begin{align*}
-        u_\nabla R[i,j] &= g[i,j] - \frac{1}{2} u[i + 1,j + 1] + \frac{1}{2} u[i,j + 1] +  \lambda ( \frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} + \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} - \frac{u[i,n]}{|u[i,n]|} )
+        \nabla E[i,j] =   & \doubleunderline{- 2u[i,j] + 2g[i,j-1] - 2u[i+1,j] - u[i+2,j] } \\
+        & \doubleunderline{+ 2g[i-1,j] - 2u[i,j+1] + 2g[i,j] } \\ 
+        & \doubleunderline{+ 2g[i+1,j] - 2u[i,j+2] + 2g[i,j+1] } \\
+        & \doubleunderline{+ \lambda \Bigg(-\frac{u[i + 1,j] - u[i,j]}{|u[i + 1,j] - u[i,j]|} - \frac{u[i, j + 1] - u[i,j]}{|u[i, j + 1] - u[i,j]|} -\frac{u[i + 1,n] - u[i,n]}{|u[i + 1,n] - u[i,n]|} \Bigg) }
     \end{align*}
 }%
+hint: $\forall i \in [1,M-2], \forall j \in [1,N-2]$ \\
+The boundaries behave the same as before.
 \end{document}
